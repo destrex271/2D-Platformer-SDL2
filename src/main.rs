@@ -1,6 +1,8 @@
 // Module and crate declarations
 extern crate sdl2;
 pub mod game_config;
+pub mod ground;
+pub mod player;
 
 // System Libraries
 use std::time::Duration;
@@ -12,12 +14,14 @@ use sdl2::pixels::Color;
 
 // Game config lib
 use game_config::{GameConfig, GameStatus};
+use player::{Player, PlayerMovements};
 
 static WIDTH: u32 = 1000;
 static HEIGHT: u32 = 700;
 
 fn main() {
     let mut game_config = GameConfig::new(GameStatus::Playing, 0);
+    let mut player = Player::new(100, 100, 50, 50);
 
     let sdl_context = sdl2::init().unwrap();
     let video_subsystem = sdl_context.video().unwrap();
@@ -33,13 +37,10 @@ fn main() {
     canvas.present();
 
     let mut event_pump = sdl_context.event_pump().unwrap();
-    let mut i = 0;
 
     'main: loop {
-        i = (i + 1) % 255;
         canvas.set_draw_color(Color::RGB(0, 0, 0));
         canvas.clear();
-        canvas.present();
 
         for event in event_pump.poll_iter() {
             match event {
@@ -52,7 +53,15 @@ fn main() {
                     keycode: Some(Keycode::R),
                     ..
                 } => game_config.resume(),
-                _ => {}
+                Event::KeyDown {
+                    keycode: Some(Keycode::D),
+                    ..
+                } => player.move_player(PlayerMovements::Forward),
+                Event::KeyDown {
+                    keycode: Some(Keycode::A),
+                    ..
+                } => player.move_player(PlayerMovements::Backward),
+                _ => player.update_player_state(),
             }
         }
 
@@ -69,8 +78,12 @@ fn main() {
             }
             _ => {}
         }
+        // Rendering Ground
 
-        println!("Playing");
+        // Rendering Player
+        canvas.set_draw_color(player.get_player_color());
+        canvas.fill_rect(player.get_sprite()).unwrap();
+
         canvas.present();
         std::thread::sleep(Duration::new(0, 1_000_000_000u32 / 60));
     }

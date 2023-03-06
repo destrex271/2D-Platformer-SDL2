@@ -23,7 +23,7 @@ impl GameConfig {
         self.status = GameStatus::Playing;
     }
 
-    pub fn increaseScore(&mut self) {
+    pub fn increase_score(&mut self) {
         self.score += 1;
     }
 
@@ -33,5 +33,12 @@ impl GameConfig {
 
     pub fn get_status(&self) -> GameStatus {
         self.status
+    }
+}
+
+// Implementing the Drop Trait for our game config
+impl Drop for GameConfig {
+    fn drop(&mut self) {
+        println!("Game Configuration Destroyed!");
     }
 }
