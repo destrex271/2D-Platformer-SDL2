@@ -25,7 +25,7 @@ fn main() {
     let mut game_config = GameConfig::new(GameStatus::Playing, 0);
     let mut player = Player::new(
         100,
-        HEIGHT as i32 - 200,
+        HEIGHT as i32 - 100,
         20,
         20,
         WIDTH as i32,
