@@ -9,6 +9,7 @@ use std::time::Duration;
 
 // sdl2 libraries
 use sdl2::event::Event;
+use sdl2::image::{InitFlag, LoadTexture};
 use sdl2::keyboard::Keycode;
 use sdl2::pixels::Color;
 
@@ -21,10 +22,18 @@ static HEIGHT: u32 = 700;
 
 fn main() {
     let mut game_config = GameConfig::new(GameStatus::Playing, 0);
-    let mut player = Player::new(100, 100, 50, 50);
+    let mut player = Player::new(
+        100,
+        HEIGHT as i32 - 200,
+        20,
+        20,
+        WIDTH as i32,
+        HEIGHT as i32,
+    );
 
     let sdl_context = sdl2::init().unwrap();
     let video_subsystem = sdl_context.video().unwrap();
+    let mut _image_ctx = sdl2::image::init(InitFlag::PNG);
 
     let window = video_subsystem
         .window("Game", WIDTH, HEIGHT)
@@ -32,6 +41,17 @@ fn main() {
         .unwrap();
 
     let mut canvas = window.into_canvas().build().unwrap();
+
+    let sky_texture_creator = canvas.texture_creator();
+    let ground_texture_creator = canvas.texture_creator();
+
+    let sky_texture = sky_texture_creator
+        .load_texture("/home/akshat/fun/rust/game/src/assets/sky.png")
+        .unwrap();
+    let ground_texture = ground_texture_creator
+        .load_texture("/home/akshat/fun/rust/game/src/assets/rocks_1.png")
+        .unwrap();
+
     canvas.set_draw_color(Color::RGB(0, 0, 0));
     canvas.clear();
     canvas.present();
@@ -54,14 +74,20 @@ fn main() {
                     ..
                 } => game_config.resume(),
                 Event::KeyDown {
+                    keycode: Some(Keycode::Escape),
+                    ..
+                } => game_config.quit(),
+                Event::KeyDown {
                     keycode: Some(Keycode::D),
                     ..
-                } => player.move_player(PlayerMovements::Forward),
+                } => {
+                    player.move_player(PlayerMovements::Forward);
+                }
                 Event::KeyDown {
                     keycode: Some(Keycode::A),
                     ..
                 } => player.move_player(PlayerMovements::Backward),
-                _ => player.update_player_state(),
+                _ => {}
             }
         }
 
@@ -78,13 +104,15 @@ fn main() {
             }
             _ => {}
         }
-        // Rendering Ground
+        // Rendering sky
+        canvas.copy(&sky_texture, None, None).unwrap();
 
         // Rendering Player
+        // player.move_player(PlayerMovements::Forward);
         canvas.set_draw_color(player.get_player_color());
         canvas.fill_rect(player.get_sprite()).unwrap();
 
         canvas.present();
-        std::thread::sleep(Duration::new(0, 1_000_000_000u32 / 60));
+        std::thread::sleep(Duration::new(0, 1_000_000_000u32 / 30));
     }
 }

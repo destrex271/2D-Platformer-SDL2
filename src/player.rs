@@ -16,18 +16,24 @@ pub struct Player {
     y: i32,
     speed_x: i32,
     speed_y: i32,
+    limx: i32,
+    limy: i32,
 }
 
+static accl: f32 = 9.8;
+
 impl Player {
-    pub fn new(x: i32, y: i32, height: u32, width: u32) -> Player {
+    pub fn new(x: i32, y: i32, height: u32, width: u32, limx: i32, limy: i32) -> Player {
         Player {
             sprite: Rect::new(x, y, width, height),
             x,
             y,
             height,
             width,
-            speed_x: 2,
-            speed_y: 2,
+            speed_x: 10,
+            speed_y: 10,
+            limx,
+            limy,
         }
     }
 
@@ -71,15 +77,47 @@ impl Player {
         self.sprite.set_y(self.y);
     }
 
+    pub fn add_force(&mut self, mult: i8) {
+        let mut end_pos = self.x as f32;
+        let v = self.x;
+        if mult < 0 {
+            while end_pos >= v as f32 - self.speed_x as f32 {
+                // end_pos += 0.5 * accl * mult as f32;
+                end_pos += mult as f32 * 0.1;
+                self.x = end_pos as i32;
+                println!("Forcing back {:?}", self.x);
+                self.update_player_state();
+            }
+        } else {
+            while end_pos <= v as f32 + self.speed_x as f32 {
+                // end_pos += 0.5 * accl * mult as f32;
+                end_pos += mult as f32 * 0.1;
+                self.x = end_pos as i32;
+                println!("Forcing {:?}", self.x);
+                self.update_player_state();
+            }
+        }
+    }
+
     pub fn move_player(&mut self, dirn: PlayerMovements) {
         match dirn {
             PlayerMovements::Jump => {}
             PlayerMovements::Crouch => {}
             PlayerMovements::Forward => {
-                self.x += self.speed_x;
+                if self.sprite.x >= self.limx {
+                    self.x = 0;
+                    self.sprite.x = 0;
+                } else {
+                    self.add_force(1);
+                }
             }
             PlayerMovements::Backward => {
-                self.x -= self.speed_x;
+                if self.sprite.x < 0 {
+                    self.x = self.limx - self.width as i32;
+                    self.sprite.x = self.limx - self.width as i32;
+                } else {
+                    self.add_force(-1);
+                }
             }
         }
     }
