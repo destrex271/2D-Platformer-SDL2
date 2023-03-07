@@ -15,6 +15,7 @@ use sdl2::pixels::Color;
 
 // Game config lib
 use game_config::{GameConfig, GameStatus};
+use ground::Ground;
 use player::{Player, PlayerMovements};
 
 static WIDTH: u32 = 1000;
@@ -29,6 +30,12 @@ fn main() {
         20,
         WIDTH as i32,
         HEIGHT as i32,
+    );
+    let ground = Ground::new(
+        WIDTH,
+        100,
+        0,
+        HEIGHT as i32 - 100 + player.get_height() as i32,
     );
 
     let sdl_context = sdl2::init().unwrap();
@@ -106,6 +113,10 @@ fn main() {
         }
         // Rendering sky
         canvas.copy(&sky_texture, None, None).unwrap();
+
+        // Rendering Ground
+        canvas.set_draw_color(Color::RGB(255, 0, 100));
+        canvas.fill_rect(ground.get_sprite()).unwrap();
 
         // Rendering Player
         // player.move_player(PlayerMovements::Forward);

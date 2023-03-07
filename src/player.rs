@@ -104,20 +104,10 @@ impl Player {
             PlayerMovements::Jump => {}
             PlayerMovements::Crouch => {}
             PlayerMovements::Forward => {
-                if self.sprite.x >= self.limx {
-                    self.x = 0;
-                    self.sprite.x = 0;
-                } else {
-                    self.add_force(1);
-                }
+                self.add_force(1);
             }
             PlayerMovements::Backward => {
-                if self.sprite.x < 0 {
-                    self.x = self.limx - self.width as i32;
-                    self.sprite.x = self.limx - self.width as i32;
-                } else {
-                    self.add_force(-1);
-                }
+                self.add_force(-1);
             }
         }
     }
